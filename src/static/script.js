@@ -98,10 +98,32 @@ socket.on("progress_status", (response) => {
         var cellArtist = row.insertCell(0);
         var cellTitle = row.insertCell(1);
         var cellStatus = row.insertCell(2);
+        var cellDownload = row.insertCell(3);
 
         cellArtist.innerHTML = item.Artist;
         cellTitle.innerHTML = item.Title;
         cellStatus.innerHTML = item.Status;
+        
+        // Create download button for all items
+        var downloadBtn = document.createElement('button');
+        downloadBtn.className = 'btn btn-success btn-sm';
+        downloadBtn.innerHTML = '<i class="fa fa-download"></i> Download';
+        
+        // Disable button during download, enable when complete
+        if (item.Status === "Processing Complete" || item.Status === "File Already Exists") {
+            downloadBtn.disabled = false;
+            downloadBtn.onclick = function() {
+                if (item.FilePath) {
+                    window.open('/download/' + encodeURIComponent(item.FilePath), '_blank');
+                }
+            };
+        } else {
+            downloadBtn.disabled = true;
+            downloadBtn.classList.add('btn-secondary');
+            downloadBtn.classList.remove('btn-success');
+        }
+        
+        cellDownload.appendChild(downloadBtn);
     });
     var percent_completion = response.Percent_Completion;
     var actual_status = response.Status;

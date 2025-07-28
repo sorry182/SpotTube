@@ -8,7 +8,7 @@ import concurrent.futures
 import yt_dlp
 from thefuzz import fuzz
 from ytmusicapi import YTMusic
-from flask import Flask, render_template
+from flask import Flask, render_template, send_file, abort
 from flask_socketio import SocketIO
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -249,6 +249,7 @@ class DataHandler:
 
                 if os.path.exists(full_file_path):
                     song["Status"] = "File Already Exists"
+                    song["FilePath"] = f"{file_name}.mp3"
                     self.logger.warning("File Already Exists: " + artist + " " + title)
                 else:
                     try:
@@ -283,6 +284,7 @@ class DataHandler:
                         yt_downloader.download([found_link])
                         self.logger.warning("yt_dl Complete : " + found_link)
                         song["Status"] = "Processing Complete"
+                        song["FilePath"] = f"{file_name}.mp3"
 
                         self.stop_downloading_event.wait(self.sleep_interval)
 
@@ -368,6 +370,19 @@ data_handler = DataHandler()
 @app.route("/")
 def home():
     return render_template("base.html")
+
+
+@app.route("/download/<path:filename>")
+def download_file(filename):
+    try:
+        file_path = os.path.join(data_handler.download_folder, filename)
+        if os.path.exists(file_path):
+            return send_file(file_path, as_attachment=True)
+        else:
+            abort(404, description="File not found")
+    except Exception as e:
+        data_handler.logger.error(f"Error serving file {filename}: {str(e)}")
+        abort(500, description="Internal server error")
 
 
 @socketio.on("download")

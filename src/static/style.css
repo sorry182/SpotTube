@@ -25,6 +25,24 @@ body {
     margin-left: 10px;
 }
 
+/* Download button styling */
+.btn-sm {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Table styling for download column */
+#progress-table th:last-child,
+#progress-table td:last-child {
+    text-align: center;
+    width: 120px;
+}
+
 ::-webkit-scrollbar {
     width: 12px;
 }
